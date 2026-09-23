@@ -2,7 +2,8 @@ return function(modules)
     local env = (getgenv and getgenv()) or _G
     if type(env.NixLUA) == "table" and type(env.NixLUA.Unload) == "function" then env.NixLUA:Unload() end
     local Scope, Settings = modules["core/Scope"], modules["core/Settings"]
-    local app = {Version = "0.2.0", Game = "MM2", modules = modules, Settings = Settings,
+    print("[Nix LUA] Starting MM2 v0.2.1")
+    local app = {Version = "0.2.1", Game = "MM2", modules = modules, Settings = Settings,
         settings = Settings.defaults(), scope = Scope.new(), services = {}, colorCache = {}}
     env.NixLUA = app
     function app:Unload()
@@ -41,8 +42,6 @@ return function(modules)
         app.player = app.services.Players.LocalPlayer
         assert(app.player, "Nix LUA requires a client")
         app.parent = app.player:WaitForChild("PlayerGui", 10)
-        local hidden = gethui or get_hidden_gui
-        if hidden then local ok, result = pcall(hidden) if ok and typeof(result) == "Instance" then app.parent = result end end
         assert(app.parent, "PlayerGui is unavailable")
         app.Draw, app.Roles = modules["visuals/Draw"], modules["games/Roles"]
         app.overlay = app.scope:add(app.Draw.new("ScreenGui", {Name = "NixLUA_MM2_Overlay", ResetOnSpawn = false,
@@ -50,10 +49,20 @@ return function(modules)
         app.effectsRoot = app.scope:add(app.Draw.new("Folder", {Name = "NixLUA_MM2_Effects"}, workspace))
         app.config = modules["core/Config"](app)
         app.game = modules["games/MM2"](app)
+        print("[Nix LUA] Creating menu in PlayerGui")
         app.menu = modules["ui/Menu"](app)
+        print("[Nix LUA] Menu created; RightShift toggles visibility")
         app.features = {}
         for _, name in ipairs({"features/World", "features/Movement", "features/Character", "features/ESP", "features/Aim", "visuals/HUD"}) do
-            table.insert(app.features, modules[name](app))
+            local featureScope = app.scope:fork()
+            local context = setmetatable({scope = featureScope}, {__index = app})
+            local ok, feature = xpcall(function() return modules[name](context) end, debug.traceback)
+            if ok then table.insert(app.features, {name = name, scope = featureScope, instance = feature})
+            else
+                featureScope:destroy()
+                warn("[Nix LUA] Could not initialize " .. name .. ": " .. tostring(feature))
+                app:notify("Module unavailable: " .. name .. ". See F9.")
+            end
         end
         app.scope:connect(app.services.UserInputService.InputBegan, function(event)
             if event.KeyCode == Enum.KeyCode.End and not app.services.UserInputService:GetFocusedTextBox() then app:Unload() end
@@ -66,7 +75,16 @@ return function(modules)
             local now = os.clock()
             app.game:refresh(now)
             app.game:poll(now)
-            for _, feature in ipairs(app.features) do feature:update(dt, camera) end
+            for _, feature in ipairs(app.features) do
+                if feature.scope.alive then
+                    local ok, err = xpcall(function() feature.instance:update(dt, camera) end, debug.traceback)
+                    if not ok then
+                        feature.scope:destroy()
+                        warn("[Nix LUA] Disabled " .. feature.name .. ": " .. tostring(err))
+                        app:notify("Module stopped: " .. feature.name .. ". See F9; menu remains available.")
+                    end
+                end
+            end
             elapsed += dt
             if elapsed > 1 then
                 elapsed = 0
@@ -81,7 +99,8 @@ return function(modules)
             if not ok then warn("[Nix LUA] Runtime stopped: " .. tostring(err)) app:Unload() end
         end)
         app.scope:add(function() app.services.RunService:UnbindFromRenderStep(binding) end)
-        app:notify("Nix LUA · MM2 ready | Insert: menu | End: unload")
+        app:notify("Nix LUA · MM2 ready | RightShift: menu | End: unload")
+        print("[Nix LUA] Ready | RightShift: menu | End: unload")
     end
     local ok, err = xpcall(initialize, debug.traceback)
     if not ok then app:Unload() error("[Nix LUA] Startup failed:\n" .. tostring(err)) end

@@ -5974,7 +5974,7 @@ function NeverLose:CreateWindow(Config)
 		Size = UDim2.new(0, 640, 0, 480),
 		ConfigFolder = "ShitaroCfg",
 		Enable3DRenderer = false,
-		Keybind = "Insert"
+		Keybind = "RightShift"
 	});
 
 	if NeverLose.IsMobile then
@@ -6000,6 +6000,7 @@ function NeverLose:CreateWindow(Config)
 
 
 	local WindowFrame = Instance.new("Frame")
+	Window.Root = WindowFrame;
 	local UICorner = Instance.new("UICorner")
 	local LeftMenuFrame = Instance.new("Frame")
 	local HeadFrame = Instance.new("Frame")
@@ -6042,7 +6043,7 @@ function NeverLose:CreateWindow(Config)
 	WindowFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	WindowFrame.BorderSizePixel = 0
 	WindowFrame.ClipsDescendants = true
-	WindowFrame.Position = UDim2.new(255, 0, 255, 0)
+	WindowFrame.Position = UDim2.fromScale(0.5, 0.5)
 	WindowFrame.Size = Window.Size
 	WindowFrame.Active = true;
 
@@ -6402,13 +6403,11 @@ function NeverLose:CreateWindow(Config)
 	Window.Shadow = NeverLose:CreateShadow(WindowFrame);
 	Window.Shadow:Render(false);
 
-	task.delay(0.25,function()
-		WindowFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-		Window:SetRender(Window.Signal:GetValue());
-		NeverLose:AddSignal(Window.Signal:Connect(LPH_NO_VIRTUALIZE(function(...)
-			Window:SetRender(...);
-		end)))
-	end)
+	WindowFrame.Position = UDim2.fromScale(0.5, 0.5);
+	Window:SetRender(Window.Signal:GetValue());
+	NeverLose:AddSignal(Window.Signal:Connect(LPH_NO_VIRTUALIZE(function(...)
+		Window:SetRender(...);
+	end)));
 
 	if NeverLose.EnabledBlur then
 		NeverLose:CreateBlurModule(WindowFrame,Window.Signal);

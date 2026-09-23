@@ -1,6 +1,7 @@
 -- Upload loader.lua and the mm2 folder together at the repository root.
 -- NixLUA_Source = {repo = "username/repository", ref = "main" or a commit SHA}
 local env = (getgenv and getgenv()) or _G
+print("[Nix LUA] Loader v0.2.1 started")
 local source = env.NixLUA_Source
 assert(type(source) == "table" and type(source.repo) == "string" and type(source.ref) == "string",
     "Set getgenv().NixLUA_Source = {repo = 'username/NixLUA', ref = 'main'} first")
@@ -12,9 +13,10 @@ local names = {"core/Scope", "core/Settings", "core/Config", "games/Roles", "gam
     "features/Movement", "visuals/HUD", "init"}
 local chunks, modules = {}, {}
 -- Fetch and compile every module before touching an existing instance.
-for _, name in ipairs(names) do
+for index, name in ipairs(names) do
+    print(string.format("[Nix LUA] Download %d/%d: %s", index, #names, name))
     local ok, body = pcall(function() return game:HttpGet(base .. name .. ".luau") end)
-    assert(ok and type(body) == "string", "Could not download Nix LUA module: " .. name)
+    assert(ok and type(body) == "string", "[Nix LUA] Could not download " .. name .. ": " .. tostring(body))
     local chunk, err = loadstring(body, "NixLUA/" .. name)
     assert(chunk, "Could not compile " .. name .. ": " .. tostring(err))
     chunks[name] = chunk
@@ -25,4 +27,5 @@ for _, name in ipairs(names) do
     assert(type(result) == "function" or type(result) == "table", "Invalid module export: " .. name)
     modules[name] = result
 end
+print("[Nix LUA] All modules loaded; initializing MM2")
 return modules.init(modules)

@@ -33,7 +33,7 @@ bool("SpeedOverride") number("WalkSpeed", 22, 8, 60)
 bool("JumpOverride") number("JumpPower", 60, 20, 120) bool("BunnyHop")
 bool("Watermark", true) bool("RolePanel", true) bool("RoleNotifications", true)
 color("Accent", "719DFF")
-choice("MenuKey", "Insert", {"Insert", "RightShift", "Home", "F4"})
+choice("MenuKey", "RightShift", {"RightShift", "Insert", "Home", "F4"})
 
 function Settings.defaults()
     local result = {}

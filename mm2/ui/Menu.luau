@@ -102,6 +102,12 @@ return function(app)
     action(system, "Diagnostics", function() app:notify(app.game.diagnostics .. " | Place " .. tostring(game.PlaceId)) end)
     action(system, "Unload · End", function() app:Unload() end)
     window.Signal:SetValue(true)
+    -- Explicit initial visibility, independent of delayed callbacks in the vendor UI.
+    lib.ScreenGui.Enabled = true
+    lib.ScreenGui.Name = "NixLUA_MM2_Menu"
+    window.Root.Position = UDim2.fromScale(0.5, 0.5)
+    window.Root.Visible = true
+    window:SetRender(true)
     app.scope:add(function() window.Signal:SetValue(false) lib:Unload() end)
     return menu
 end

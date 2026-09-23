@@ -1,4 +1,4 @@
-# Nix LUA · MM2 · 0.2.0
+# Nix LUA · MM2 · 0.2.1
 
 Модульный клиентский проект для Murder Mystery 2. Меню NeverLose/Shitaro-стиля
 на основе локальной библиотеки Src3/UI.lua. Проверено компилятором Luau и автоматическими
@@ -27,7 +27,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/" .. source.repo .. "
 
 ## Управление
 
-- Insert: показать/скрыть меню. Клавиша меняется в Settings.
+- RightShift: показать/скрыть меню. Клавиша меняется в Settings.
 - End: выгрузить Nix LUA и восстановить изменённые свойства.
 - ПКМ: удержание aim assist (по умолчанию); включается во вкладке Aim assist.
 - Space: bunnyhop при включённой функции и закрытом меню.
