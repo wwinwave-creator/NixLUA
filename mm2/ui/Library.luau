@@ -1088,6 +1088,17 @@ end);
 
 NeverLose.CreateBlurModule = function() return {Disconnect = function() end} end;
 
+local EmptyFunction = function() end;
+
+function NeverLose:RollingEffect(parent)
+	local UIGradient = Instance.new("UIGradient")
+
+	UIGradient.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.00, 0.4), NumberSequenceKeypoint.new(1.00, 0.00)}
+	UIGradient.Parent = parent
+
+	return UIGradient;
+end;
+
 function NeverLose:CreateShadow(parent , RollingEffect)
 	local Shadow = {};
 
